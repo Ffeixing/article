@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>合集页面</title>
+    <style>
+        /* CSS 样式 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+        }
+
+        .header {
+            text-align: center;
+            padding: 20px;
+            background-color: #0073e6;
+            color: white;
+        }
+
+        .banner {
+            width: 100%;
+            height: auto;
+            max-height: 200px;
+        }
+
+        .category {
+            display: flex;
+            justify-content: space-around;
+            padding: 10px;
+            background-color: #fff;
+            border-top: 1px solid #ddd;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .category span {
+            font-weight: bold;
+            color: #0073e6;
+        }
+
+        .article-list {
+            display: flex;
+            flex-direction: column;
+            margin: 10px;
+        }
+
+        .article-item {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            background-color: white;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            text-decoration: none;
+            color: black;
+            cursor: pointer;
+        }
+
+        .article-image {
+            width: 80px;
+            height: 80px;
+            border-radius: 5px;
+            margin-right: 10px;
+        }
+
+        .article-info h2 {
+            font-size: 16px;
+            margin-bottom: 5px;
+        }
+
+        .date, .views {
+            font-size: 12px;
+            color: #777;
+        }
+
+        /* 隐藏文章内容部分 */
+        #article {
+            display: none;
+            padding: 20px;
+        }
+
+        #article h1 {
+            font-size: 22px;
+            color: #0073e6;
+            margin-bottom: 10px;
+        }
+
+        #article .date {
+            font-size: 12px;
+            color: #777;
+        }
+
+        #article .content {
+            margin-top: 10px;
+            line-height: 1.6;
+        }
+
+        #article .content img {
+            max-width: 100%;
+            height: auto;
+            margin: 10px 0;
+            border-radius: 8px;
+        }
+
+        #back-button {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #0073e6;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <img src="https://static.codemao.cn/pickduck/SJU9FwEbyg.png?hash=Fh4UtRNbxMh8MGOblnSwMe62gQNu" alt="横幅" class="banner">
+        <h1>“趣加应用”常见问题合集</h1>
+    </div>
+    
+    <div class="category">
+        <span>全部</span>
+        <span>最热</span>
+    </div>
+    
+    <div class="article-list">
+        <div class="article-item" onclick="showArticle(1)">
+            <img src="https://static.codemao.cn/pickduck/rJjenwEW1e.png?hash=FnM60Ia9GSuNBRr9-WRgCs19tUSC" alt="文章图片" class="article-image">
+            <div class="article-info">
+                <h2>常见问题 | 趣加应用软件打开持续白屏怎么办？</h2>
+                <p class="date">10-31</p>
+                <p class="views">-- 次浏览</p>
+            </div>
+        </div>
+        <div class="article-item" onclick="showArticle(2)">
+            <img src="https://static.codemao.cn/pickduck/rJjenwEW1e.png?hash=FnM60Ia9GSuNBRr9-WRgCs19tUSC" alt="文章图片" class="article-image">
+            <div class="article-info">
+                <h2>常见问题 | 趣加应用资源无法下载怎么办？</h2>
+                <p class="date">10-31</p>
+                <p class="views">-- 次浏览</p>
+            </div>
+        </div>
+        <div class="article-item" onclick="showArticle(3)">
+            <img src="https://static.codemao.cn/pickduck/rJjenwEW1e.png?hash=FnM60Ia9GSuNBRr9-WRgCs19tUSC" alt="文章图片" class="article-image">
+            <div class="article-info">
+                <h2>高级服务 | 我要成为管理员</h2>
+                <p class="date">10-31</p>
+                <p class="views">-- 次浏览</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 模拟文章页面内容，用 JavaScript 动态填充 -->
+    <div id="article">
+        <h1 id="article-title"></h1>
+        <p class="date" id="article-date"></p>
+        <div class="content" id="article-content"></div>
+        <button id="back-button" onclick="goBack()">返回</button>
+    </div>
+
+    <script>
+        // 定义每篇文章的内容
+        const articles = {
+            1: {
+                title: "常见问题 | 趣加应用软件打开持续白屏怎么办？",
+                date: "2024-10-31",
+                content: "趣加应用0.3.4要求的安卓版本：安卓10以上，旧版本不受支持了。<br>推荐升级安卓系统再来使用趣加应用，低系统请暂时使用网页版。            有其他使用问题，请转到《趣加应用全站手册》https://ffeixing.github.io/qjyy/...<br><img src='image1-content.jpg' alt='文章配图'>"
+            },
+            2: {
+                title: "常见问题 | 趣加应用资源无法下载怎么办？",
+                date: "2024-10-31",
+                content: "若有资源链接失效了，请联系资源原作者或与管理员取得联系；<br>若所有资源都无法下载，可能是服务器解析出现问题了，请耐心等待修复完成，等待期间可暂时收到复制链接密码到浏览器下载，麻烦各位了<br><img src='image2-content.jpg' alt='文章配图'>"
+            },
+            3: {
+                title: "高级服务 | 我要成为管理员",
+                date: "2024-10-31",
+                content: "请填写下表，24小时内将审核完毕<br>https://www.wjx.cn/vm/eqHYoTl.aspx#<br><img src='image3-content.jpg' alt='文章配图'>"
+            }
+        };
+
+        // 显示文章内容
+        function showArticle(articleId) {
+            // 获取文章内容
+            const article = articles[articleId];
+            if (article) {
+                document.getElementById('article-title').innerText = article.title;
+                document.getElementById('article-date').innerText = article.date;
+                document.getElementById('article-content').innerHTML = article.content;  // 使用 innerHTML 支持图片和换行
+
+                // 隐藏主页，显示文章内容
+                document.querySelector('.header').style.display = 'none';
+                document.querySelector('.category').style.display = 'none';
+                document.querySelector('.article-list').style.display = 'none';
+                document.getElementById('article').style.display = 'block';
+            }
+        }
+
+        // 返回到主页
+        function goBack() {
+            document.querySelector('.header').style.display = 'block';
+            document.querySelector('.category').style.display = 'flex';
+            document.querySelector('.article-list').style.display = 'flex';
+            document.getElementById('article').style.display = 'none';
+        }
+    </script>
+</body>
+</html>
