@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ChatGPT 调用</title>
+    <title>ChatGPT 接口调用示例</title>
     <style>
+        /* 样式文件 */
         body {
             font-family: Arial, sans-serif;
             display: flex;
@@ -15,6 +16,7 @@
             background: linear-gradient(135deg, #e0eafc, #cfdef3);
             overflow: hidden;
         }
+
         .chat-container {
             width: 90%;
             max-width: 600px;
@@ -27,6 +29,7 @@
             padding: 10px;
             box-sizing: border-box;
         }
+
         .chat-box {
             flex: 1;
             overflow-y: auto;
@@ -34,26 +37,48 @@
             background: #f9f9f9;
             border-radius: 8px;
             box-shadow: inset 0 4px 6px rgba(0, 0, 0, 0.1);
-            transition: background 0.3s;
             margin-bottom: 10px;
         }
+
         .message {
             margin: 10px 0;
             font-size: 16px;
             line-height: 1.5;
-            opacity: 0;
-            animation: fadeIn 0.5s forwards;
+            white-space: pre-wrap; /* 支持换行 */
+            position: relative;
         }
+
         .user-message {
             text-align: right;
             color: #007bff;
             font-weight: bold;
         }
+
         .assistant-message {
             text-align: left;
             color: #333;
             font-style: italic;
         }
+
+        .delete-button {
+            position: absolute;
+            top: 50%;
+            right: 10px;
+            transform: translateY(-50%);
+            background-color: #ff4d4d;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            font-size: 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            display: none;
+        }
+
+        .delete-button:hover {
+            background-color: #cc0000;
+        }
+
         .input-container {
             display: flex;
             align-items: center;
@@ -61,6 +86,7 @@
             background: #f0f0f5;
             border-radius: 8px;
         }
+
         input[type="text"] {
             flex: 1;
             padding: 10px;
@@ -71,6 +97,7 @@
             outline: none;
             box-sizing: border-box;
         }
+
         button {
             padding: 10px 20px;
             font-size: 16px;
@@ -79,71 +106,110 @@
             background-color: #007bff;
             color: #fff;
             cursor: pointer;
-            white-space: nowrap;  /* 防止按钮文本换行 */
+            white-space: nowrap;
             transition: background-color 0.3s;
         }
+
         button:hover {
             background-color: #0056b3;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        /* 手机端适配 */
-        @media (max-width: 600px) {
-            .input-container {
-                padding: 8px;
-            }
-            input[type="text"] {
-                font-size: 14px;
-                padding: 8px;
-                margin-right: 8px;
-            }
-            button {
-                font-size: 14px;
-                padding: 8px 16px;
-            }
         }
     </style>
 </head>
 <body>
-
 <div class="chat-container">
     <div class="chat-box" id="chatBox">
         <!-- 聊天记录 -->
     </div>
     <div class="input-container">
-        <input type="text" id="userInput" placeholder="请输入问题..." />
+        <input type="text" id="userInput" placeholder="请输入您的问题..." />
         <button onclick="sendMessage()">发送</button>
     </div>
 </div>
-
 <script>
+    // 从 Cookie 获取历史会话
+    function getHistoryFromCookies() {
+        const cookies = document.cookie.split('; ').reduce((acc, cookie) => {
+            const [key, value] = cookie.split('=');
+            acc[key] = decodeURIComponent(value);
+            return acc;
+        }, {});
+        return cookies.chatHistory ? JSON.parse(cookies.chatHistory) : [];
+    }
+
+    // 保存会话到 Cookie
+    function saveHistoryToCookies(history) {
+        document.cookie = `chatHistory=${encodeURIComponent(JSON.stringify(history))}; path=/; max-age=${60 * 60 * 24 * 365 * 10}`;
+    }
+
+    // 加载历史记录
+    function loadHistory() {
+        const chatBox = document.getElementById('chatBox');
+        const history = getHistoryFromCookies();
+        history.forEach(({ role, content }) => {
+            addMessage(role, content);
+        });
+    }
+
+    // 添加消息
+    function addMessage(role, content) {
+        const chatBox = document.getElementById('chatBox');
+        const message = document.createElement('div');
+        message.className = `message ${role}-message`;
+        message.textContent = content;
+
+        // 创建删除按钮
+        const deleteButton = document.createElement('button');
+        deleteButton.className = 'delete-button';
+        deleteButton.textContent = '删除本条';
+        deleteButton.onclick = () => deleteMessage(message, content);
+        message.appendChild(deleteButton);
+
+        // 点击显示删除按钮
+        message.onclick = () => {
+            deleteButton.style.display = deleteButton.style.display === 'inline-block' ? 'none' : 'inline-block';
+        };
+
+        chatBox.appendChild(message);
+    }
+
+    // 删除单条消息
+    function deleteMessage(element, content) {
+        const chatBox = document.getElementById('chatBox');
+        chatBox.removeChild(element);
+
+        // 更新历史记录
+        const history = getHistoryFromCookies();
+        const updatedHistory = history.filter(item => item.content !== content);
+        saveHistoryToCookies(updatedHistory);
+    }
+
     async function sendMessage() {
         const chatBox = document.getElementById('chatBox');
         const userInput = document.getElementById('userInput').value;
-        
+
         if (userInput.trim() === '') return;
-        
+
         // 用户输入显示
-        const userMessage = document.createElement('div');
-        userMessage.className = 'message user-message';
-        userMessage.textContent = '我：' + userInput;
-        chatBox.appendChild(userMessage);
-        
+        addMessage('user', userInput);
+
         // 清空输入框
         document.getElementById('userInput').value = '';
-        
+
+        // 显示加载中提示
+        const loadingMessage = document.createElement('div');
+        loadingMessage.className = 'message assistant-message';
+        loadingMessage.textContent = '加载中，较长文字等待时间较长';
+        chatBox.appendChild(loadingMessage);
+
         // 请求参数
         const payload = {
             model: "gpt-4o-mini",
             messages: [{ role: "user", content: userInput }],
             stream: false
         };
-        
-        // API 请求
+
         try {
+            // API 请求
             const response = await fetch("https://apiserver.alcex.cn/v1/chat/completions", {
                 method: "POST",
                 headers: {
@@ -154,39 +220,28 @@
             });
 
             const result = await response.json();
-            
-            // 显示返回消息
-            const assistantMessage = document.createElement('div');
-            assistantMessage.className = 'message assistant-message';
-            chatBox.appendChild(assistantMessage);
-            
             const content = result.choices[0].message.content;
-            typeText(assistantMessage, content);
 
+            // 显示返回内容
+            loadingMessage.remove(); // 移除加载提示
+            addMessage('assistant', content);
+
+            // 保存会话到 Cookie
+            const history = getHistoryFromCookies();
+            history.push({ role: 'user', content: userInput });
+            history.push({ role: 'assistant', content });
+            saveHistoryToCookies(history);
         } catch (error) {
             console.error("Error:", error);
-            const errorMessage = document.createElement('div');
-            errorMessage.className = 'message assistant-message';
-            errorMessage.textContent = 'ChatGPT：请求失败，请稍后再试。';
-            chatBox.appendChild(errorMessage);
+            loadingMessage.textContent = '请求失败，请稍后再试。';
         }
 
         // 自动滚动到底部
         chatBox.scrollTop = chatBox.scrollHeight;
     }
 
-    // 逐字显示文字
-    function typeText(element, text) {
-        let index = 0;
-        function type() {
-            if (index < text.length) {
-                element.textContent += text[index++];
-                setTimeout(type, 50);  // 控制文字显示速度
-            }
-        }
-        type();
-    }
+    // 加载历史记录
+    loadHistory();
 </script>
-
 </body>
 </html>
